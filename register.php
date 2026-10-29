@@ -1,0 +1,1 @@
+ <input type="text" class="form-control" id="role" name="role" value="customer" required>
