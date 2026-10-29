@@ -5,7 +5,7 @@ include 'config.php';
 
 
 $query = "SELECT s.id, s.name, s.price, s.url_image
-          FROM product s";
+          FROM products s";
 $result = mysqli_query($conn, $query);
 ?>
 <!DOCTYPE html>

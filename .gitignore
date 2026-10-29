@@ -1,0 +1,8 @@
+# uploads are generated at runtime
+uploads/*
+!uploads/.gitkeep
+
+# local logs / editor noise
+*.log
+.DS_Store
+Thumbs.db

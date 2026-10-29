@@ -2,7 +2,7 @@
 session_start();
 
 function is_admin() {
-    return $_SESSION['role'] === 'admin';
+    return isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
 }
 
 function require_admin() {

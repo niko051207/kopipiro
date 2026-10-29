@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" role="img" aria-label="Toast illustration">
+  <rect width="600" height="450" fill="#f7ecd7"/>
+  <circle cx="300" cy="220" r="150" fill="#efdcbd"/>
+  <ellipse cx="300" cy="372" rx="140" ry="16" fill="#e0c9a3"/>
+  <path d="M170 205c0-55 45-95 130-95s130 40 130 95v105a30 30 0 0 1-30 30H200a30 30 0 0 1-30-30z" fill="#d9a55f"/>
+  <path d="M196 215c0-42 38-72 104-72s104 30 104 72v95a14 14 0 0 1-14 14H210a14 14 0 0 1-14-14z" fill="#f6dfb4"/>
+  <path d="M222 250l56 34 34-44 44 52 40-30v58a10 10 0 0 1-10 10H232a10 10 0 0 1-10-10z" fill="#8b5a2b"/>
+  <circle cx="262" cy="238" r="16" fill="#8b5a2b" opacity=".75"/>
+  <circle cx="330" cy="252" r="12" fill="#8b5a2b" opacity=".55"/>
+  <g fill="#f5c455">
+    <rect x="240" y="200" width="46" height="16" rx="6" transform="rotate(-10 263 208)"/>
+    <rect x="315" y="205" width="52" height="16" rx="6" transform="rotate(8 341 213)"/>
+    <rect x="300" y="285" width="44" height="14" rx="6" transform="rotate(-6 322 292)"/>
+  </g>
+</svg>
