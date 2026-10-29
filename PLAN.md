@@ -3,7 +3,7 @@
 Companion to `context.md`. `context.md` says *what the app must be*; this file says
 *what we do next, in what order, and how we know it works*.
 
-**Status:** Phase 0 complete (MySQL 8.4.3 initialised at `C:\laragon\data\mysql`, schema + seed imported, catalog renders clean).
+**Status:** Phases 0?1 complete (MySQL 8.4.3 initialised at `C:\laragon\data\mysql`, schema + seed imported, catalog renders clean).
 
 **Rule for every phase:** the app must still run at the end of it, and the phase's
 acceptance checklist must pass before moving on.
@@ -38,21 +38,21 @@ and `http://kopipiro.test/index.php` renders without warnings.
 
 Foundation for every access rule. Do this before any feature page.
 
-- [ ] Rewrite `auth.php`:
+- [x] Rewrite `auth.php`:
       `current_user()`, `is_logged_in()`, `has_role(...$r)`, `require_login()`,
       `require_role(...$r)`, `is_customer()`. Fix the unguarded `$_SESSION['role']`.
-- [ ] Role vocabulary is `owner` | `kasir` | `customer`. No `admin` anywhere.
-- [ ] `logout.php`: clear session array, delete cookie, destroy session, redirect.
-- [ ] `register.php`: full page — form, POST handler, username uniqueness check,
+- [x] Role vocabulary is `owner` | `kasir` | `customer`. No `admin` anywhere.
+- [x] `logout.php`: clear session array, delete cookie, destroy session, redirect.
+- [x] `register.php`: full page — form, POST handler, username uniqueness check,
       password confirm, min length, `password_hash`, forced role `customer`,
       success → login page with flash message.
-- [ ] `login.php`: redirect by role (owner → `admin/dashboard.php`, kasir →
+- [x] `login.php`: redirect by role (owner → `admin/dashboard.php`, kasir →
       `cashier/orders.php`, customer → `index.php`); keep the existing secure pattern.
-- [ ] `navbar.php`: include `auth.php` defensively; role-aware menu
+- [x] `navbar.php`: include `auth.php` defensively; role-aware menu
       (Cart + My Orders for customer, Orders for kasir, Dashboard for owner).
-- [ ] `includes/helpers.php`: `e()` (htmlspecialchars), `rupiah()`, `flash()`,
+- [x] `helpers.php`: `e()` (htmlspecialchars), `rupiah()`, `flash()`,
       `csrf_token()`, `csrf_check()`. Move `rupiah()` here, not into views.
-- [ ] `403.php` shared page; `require_role()` redirects to it.
+- [x] `403.php` shared page; `require_role()` redirects to it.
 
 **Done when:** all three accounts log in and land on the right page; `admin/dashboard.php`
 returns 403 for a customer; logout kills the session; a duplicate username is rejected.

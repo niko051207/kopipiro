@@ -36,12 +36,12 @@ $result = mysqli_query($conn, $query);
                                 <td> <img src="<?= htmlspecialchars($row['url_image']) ?>" width="100" class="img-fluid" alt="coffee image"></td>
                                 <td><?= htmlspecialchars($row['name']) ?></td>
                                 <td>
-                                <?php if(isset($_SESSION['user_id']) && $_SESSION['role'] == 'customer'){ ?>
-                                <strike><?= htmlspecialchars($row['price']) ?></strike><br/>
-                                <?= htmlspecialchars($row['price']*0.9) ?>
-                                <?php } else{ ?>
-                                <?= htmlspecialchars($row['price']) ?>
-                                <?php } ?>
+                                <?php if (is_customer()): ?>
+                                <strike class="text-muted"><?= e(rupiah($row['price'])) ?></strike><br/>
+                                <span class="fw-semibold"><?= e(rupiah($row['price'] * 0.9)) ?></span>
+                                <?php else: ?>
+                                <?= e(rupiah($row['price'])) ?>
+                                <?php endif; ?>
                                 </td>
                                 <td class="text-center">
                                 </td>

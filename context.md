@@ -48,22 +48,29 @@ Repo: `https://github.com/niko051207/kopipiro` — local path `C:\laragon\www\ko
 
 ```
 C:\laragon\www\kopipiro\
-├── .git/
-├── auth.php          # session_start + is_admin() + require_admin() gate
-├── config.php        # mysqli connection (localhost, root, no pass, db_kopipiro)
-├── index.php         # product catalog (table) + 10% discount display for customers
-├── login.php         # username/password login, password_verify, session regenerate
-├── navbar.php        # dark navbar, role badge, Login/Logout, Users link for admin
-├── register.php      # INCOMPLETE — a single orphan <input> fragment, no form, no handler
-├── seed_admin.php    # one-off: inserts admin / admin123, tells you to delete it
-├── logout.php        # MISSING (navbar links to it)
-├── users.php         # MISSING (navbar links to it)
-└── context.md        # this file
+├── .gitignore        # ignores uploads/* and logs
+├── auth.php          # session + role helpers (require_login, require_role, is_customer)
+├── helpers.php       # e(), rupiah(), url(), redirect(), flash(), CSRF, status_badge()
+├── config.php        # mysqli connection, utf8mb4, Asia/Jakarta, friendly failure
+├── index.php         # product catalog + 10% discount display for customers
+├── login.php         # login, CSRF, role-based redirect
+├── logout.php        # clears session + cookie
+├── register.php      # customer self-registration (role forced to 'customer')
+├── 403.php           # shared "access denied" page
+├── navbar.php        # role-aware navbar, renders flash messages
+├── database.sql      # schema (users, categories, products, orders, order_items, reviews)
+├── seed.sql          # demo data + test accounts
+├── context.md  PLAN.md
+├── assets/img/       # kopi.svg, non-kopi.svg, toast.svg placeholders
+├── uploads/          # admin product images (runtime, git-ignored)
+├── admin/
+│   └── dashboard.php # owner KPIs + recent orders (chart in Phase 6)
+└── cashier/
+    └── orders.php    # orders assigned to the logged-in kasir only
 ```
 
-Everything is flat, no subfolders yet. That is fine for a case study, but the
-number of pages required (catalog, cart, checkout, cashier, owner) will get messy —
-see §7 for the proposed layout.
+`seed_admin.php` and the old flat `product` table are gone. Flat root files were kept
+instead of moving everything into `includes/` — fewer includes to forget for students.
 
 ### Environment facts
 
@@ -218,6 +225,17 @@ before completion. Claiming sets `cashier_id`. Completed/cancelled orders are re
 
 ## 6. Code review of what is already here
 
+**Resolved in phases 0–1:** #1 (unguarded session role), #2 (role naming → `owner`),
+#3 (navbar include order), #5 (price formatting/rounding), #7 (register page),
+#8 partially (`logout.php` exists; `users.php` still Phase 4), #9 (CSRF helper exists,
+applied to login/register only), #11 (`seed_admin.php` deleted), #13 (`database.sql`
++ `seed.sql` committed).
+
+**Still open:** #6 (catalog markup), #8 (`users.php`), #9 (CSRF on remaining forms),
+#10 (upload validation), #12 (delete guard).
+
+### Baseline observations
+
 ### Works
 
 - `login.php` — `mysqli_prepare` + `bind_param`, `password_verify`, `session_regenerate_id(true)`.
@@ -284,11 +302,15 @@ cashier/
   orders.php              WHERE cashier_id = me                 (req. 5)
   order_detail.php        claim + update status
 
-includes/
-  auth.php  config.php  navbar.php  csrf.php  helpers.php  upload.php
+auth.php  config.php  navbar.php  helpers.php  upload.php   # shared, at app root
 uploads/                  product images (writable, .htaccess deny php)
 database.sql  seed.sql
 ```
+
+Already built: `auth.php`, `helpers.php`, `config.php`, `navbar.php`, `403.php`,
+`logout.php`, `admin/dashboard.php`, `cashier/orders.php`.
+Still to build: catalog rewrite, cart/checkout, product CRUD + `upload.php`,
+`admin/orders.php`, `admin/export_excel.php`, `cashier/order_detail.php`.
 
 If splitting into `admin/` and `cashier/` feels heavy, the minimum viable structure is
 one folder per role with a shared `auth.php` — but do **not** put role checks only in the navbar.
