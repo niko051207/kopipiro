@@ -1,0 +1,12 @@
+<?php
+require 'auth.php';
+require 'config.php';
+require_role('kasir');
+$statement = $conn->prepare('SELECT * FROM orders WHERE cashier_id = ? OR (cashier_id IS NULL AND status = "pending") ORDER BY created_at ASC');
+$statement->bind_param('i', $_SESSION['user_id']);
+$statement->execute();
+$orders = $statement->get_result()->fetch_all(MYSQLI_ASSOC);
+layout_start('Pesanan kasir', 'cashier');
+?>
+<section class="page-section"><div class="container"><div class="page-title"><span class="eyebrow">MEJA KASIR</span><h1>Pesanan <em>hari ini.</em></h1><p>Ambil pesanan baru untuk mulai menanganinya. Pesanan aktif hanya terlihat oleh kasir yang mengelola.</p></div><?php show_flash(); ?><div class="cashier-grid"><?php foreach ($orders as $order): $itemsStatement = $conn->prepare('SELECT product_name, quantity, line_total FROM order_items WHERE order_id = ?'); $itemsStatement->bind_param('i', $order['id']); $itemsStatement->execute(); $items = $itemsStatement->get_result()->fetch_all(MYSQLI_ASSOC); ?><article class="order-card"><div class="order-card-top"><span class="status-pill status-<?= e($order['status']) ?>"><?= e($order['status']) ?></span><span>#<?= (int) $order['id'] ?></span></div><h2><?= e($order['customer_name']) ?></h2><a class="order-phone" href="tel:<?= e($order['phone']) ?>"><?= e($order['phone']) ?></a><div class="order-lines"><?php foreach ($items as $item): ?><div><span><?= (int) $item['quantity'] ?> × <?= e($item['product_name']) ?></span><span><?= money($item['line_total']) ?></span></div><?php endforeach; ?></div><div class="order-total"><span>Total</span><strong><?= money($order['total']) ?></strong></div><?php if ($order['status'] !== 'completed' && $order['status'] !== 'cancelled'): ?><form method="post" action="order-update.php"><input type="hidden" name="order_id" value="<?= (int) $order['id'] ?>"><select class="form-select mb-2" name="status"><option value="preparing" <?= $order['status'] === 'preparing' ? 'selected' : '' ?>>Sedang disiapkan</option><option value="ready" <?= $order['status'] === 'ready' ? 'selected' : '' ?>>Siap diambil</option><option value="completed">Selesaikan pesanan</option></select><button class="btn btn-dark rounded-pill w-100">Perbarui status</button></form><?php endif; ?></article><?php endforeach; ?><?php if (!$orders): ?><div class="empty-state"><span>☕</span><h3>Belum ada pesanan</h3><p>Pesanan baru akan muncul di sini.</p></div><?php endif; ?></div></div></section>
+<?php layout_end(); ?>

@@ -1,81 +1,93 @@
 <?php
-// auth.php — session + role helpers. Include this FIRST on every page.
+session_start();
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+function e($value)
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
-require_once __DIR__ . '/helpers.php';
-
-/** The logged-in user as stored in the session, or null for a guest. */
-function current_user(): ?array
+function money($amount)
 {
-    if (empty($_SESSION['user_id'])) {
-        return null;
-    }
-
-    return [
-        'id'       => (int) $_SESSION['user_id'],
-        'username' => $_SESSION['username'] ?? '',
-        'role'     => $_SESSION['role'] ?? '',
-    ];
+    return 'Rp ' . number_format((float) $amount, 0, ',', '.');
 }
 
-function is_logged_in(): bool
+function logged_in()
 {
-    return current_user() !== null;
+    return isset($_SESSION['user_id']);
 }
 
-function has_role(string ...$roles): bool
+function require_role($role)
 {
-    $user = current_user();
-
-    return $user !== null && in_array($user['role'], $roles, true);
-}
-
-function is_owner(): bool
-{
-    return has_role('owner');
-}
-
-function is_kasir(): bool
-{
-    return has_role('kasir');
-}
-
-/** Only this decides the 10% discount. One source of truth. */
-function is_customer(): bool
-{
-    return has_role('customer');
-}
-
-/** Send guests to the login page, remembering where they wanted to go. */
-function require_login(): void
-{
-    if (!is_logged_in()) {
-        flash('warning', 'Silakan login terlebih dahulu.');
-        redirect('login.php');
-    }
-}
-
-function require_role(string ...$roles): void
-{
-    require_login();
-
-    if (!has_role(...$roles)) {
-        http_response_code(403);
-        require __DIR__ . '/403.php';
+    if (!logged_in() || $_SESSION['role'] !== $role) {
+        header('Location: login.php');
         exit;
     }
 }
 
-/** Where a user should land after login. */
-function home_for_role(string $role): string
+function layout_start($title, $active = '')
 {
-    return match ($role) {
-        'owner'    => 'admin/dashboard.php',
-        'kasir'    => 'cashier/orders.php',
-        'customer' => 'index.php',
-        default    => 'index.php',
-    };
+    $user = $_SESSION['username'] ?? null;
+    $role = $_SESSION['role'] ?? null;
+    ?>
+    <!doctype html>
+    <html lang="id">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title><?= e($title) ?> · Kopipiro</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="assets/style.css" rel="stylesheet">
+    </head>
+    <body>
+    <nav class="navbar navbar-expand-lg site-nav">
+        <div class="container">
+            <a class="navbar-brand" href="index.php"><span class="brand-mark">K</span> kopipiro<span class="brand-dot">.</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#siteNav"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="siteNav">
+                <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                    <a class="nav-link <?= $active === 'menu' ? 'active' : '' ?>" href="index.php">Menu</a>
+                    <a class="nav-link" href="index.php#about">Tentang</a>
+                    <?php if ($role === 'owner'): ?><a class="nav-link <?= $active === 'owner' ? 'active' : '' ?>" href="owner.php">Dashboard</a><?php endif; ?>
+                    <?php if ($role === 'kasir'): ?><a class="nav-link <?= $active === 'cashier' ? 'active' : '' ?>" href="cashier.php">Pesanan</a><?php endif; ?>
+                    <?php if ($user): ?>
+                        <span class="nav-user"><?= e($user) ?></span><a class="btn btn-outline-dark btn-sm rounded-pill px-3" href="logout.php">Keluar</a>
+                    <?php else: ?>
+                        <a class="nav-link" href="login.php">Masuk</a><a class="btn btn-dark btn-sm rounded-pill px-3" href="register.php">Daftar</a>
+                    <?php endif; ?>
+                    <a class="cart-link" href="checkout.php" aria-label="Keranjang">Bag <span><?= array_sum($_SESSION['cart'] ?? []) ?></span></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <main>
+    <?php
+}
+
+function layout_end()
+{
+    ?>
+    </main>
+    <footer class="site-footer"><div class="container d-flex justify-content-between flex-wrap gap-2"><span>kopipiro<span class="brand-dot">.</span></span><span>Kopi yang bikin harimu berarti.</span></div></footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/app.js"></script>
+    </body>
+    </html>
+    <?php
+}
+
+function flash($message, $type = 'success')
+{
+    $_SESSION['flash'] = ['message' => $message, 'type' => $type];
+}
+
+function show_flash()
+{
+    if (!empty($_SESSION['flash'])) {
+        $flash = $_SESSION['flash'];
+        unset($_SESSION['flash']);
+        echo '<div class="alert alert-' . e($flash['type']) . ' alert-dismissible fade show" role="alert">' . e($flash['message']) . '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+    }
 }

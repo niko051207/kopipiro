@@ -1,15 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" role="img" aria-label="Toast illustration">
-  <rect width="600" height="450" fill="#f7ecd7"/>
-  <circle cx="300" cy="220" r="150" fill="#efdcbd"/>
-  <ellipse cx="300" cy="372" rx="140" ry="16" fill="#e0c9a3"/>
-  <path d="M170 205c0-55 45-95 130-95s130 40 130 95v105a30 30 0 0 1-30 30H200a30 30 0 0 1-30-30z" fill="#d9a55f"/>
-  <path d="M196 215c0-42 38-72 104-72s104 30 104 72v95a14 14 0 0 1-14 14H210a14 14 0 0 1-14-14z" fill="#f6dfb4"/>
-  <path d="M222 250l56 34 34-44 44 52 40-30v58a10 10 0 0 1-10 10H232a10 10 0 0 1-10-10z" fill="#8b5a2b"/>
-  <circle cx="262" cy="238" r="16" fill="#8b5a2b" opacity=".75"/>
-  <circle cx="330" cy="252" r="12" fill="#8b5a2b" opacity=".55"/>
-  <g fill="#f5c455">
-    <rect x="240" y="200" width="46" height="16" rx="6" transform="rotate(-10 263 208)"/>
-    <rect x="315" y="205" width="52" height="16" rx="6" transform="rotate(8 341 213)"/>
-    <rect x="300" y="285" width="44" height="14" rx="6" transform="rotate(-6 322 292)"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800"><defs><linearGradient id="a" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#ead9bc"/><stop offset="1" stop-color="#c79a69"/></linearGradient></defs><path fill="url(#a)" d="M0 0h800v800H0z"/><ellipse cx="400" cy="440" fill="#f1eee5" rx="267" ry="206"/><path fill="#885a38" d="M250 467 282 296q7-39 49-39h137q42 0 49 39l34 171q8 48-42 48H292q-51 0-42-48z"/><path fill="#e7b96d" d="m281 452 28-146q5-25 29-25h143q23 0 28 25l29 146q4 25-22 25H303q-26 0-22-25z"/><path fill="#9f5b3a" d="M349 367c15-31 54-31 69 0 14-29 49-25 57 4 12 41-52 83-57 86-7-5-80-54-69-90z"/><path fill="#6f4d37" d="M250 542h298v15H250z"/></svg>

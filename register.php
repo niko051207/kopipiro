@@ -1,130 +1,37 @@
 <?php
-require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/config.php';
+require 'auth.php';
+require 'config.php';
 
-if (is_logged_in()) {
-    redirect(home_for_role(current_user()['role']));
+if (logged_in()) {
+    header('Location: index.php');
+    exit;
 }
-
-$errors   = [];
-$username = '';
-
+$error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    csrf_check();
-
-    $username = trim($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $confirm  = $_POST['password_confirm'] ?? '';
-
-    if (!preg_match('/^[A-Za-z0-9_]{3,50}$/', $username)) {
-        $errors[] = 'Username 3–50 karakter, hanya huruf, angka, dan garis bawah.';
-    }
-
-    if (strlen($password) < 8) {
-        $errors[] = 'Password minimal 8 karakter.';
-    }
-
-    if ($password !== $confirm) {
-        $errors[] = 'Konfirmasi password tidak sama.';
-    }
-
-    if (!$errors) {
-        $check = mysqli_prepare($conn, "SELECT id FROM users WHERE username = ?");
-        mysqli_stmt_bind_param($check, 's', $username);
-        mysqli_stmt_execute($check);
-
-        if (mysqli_fetch_assoc(mysqli_stmt_get_result($check))) {
-            $errors[] = 'Username sudah dipakai. Pilih yang lain.';
-        }
-    }
-
-    if (!$errors) {
-        $hash = password_hash($password, PASSWORD_DEFAULT);
-
+    $username = trim($_POST['username']);
+    $name = trim($_POST['name']);
+    $password = $_POST['password'];
+    if (strlen($username) < 3 || strlen($password) < 8) {
+        $error = 'Username minimal 3 karakter dan kata sandi minimal 8 karakter.';
+    } else {
         try {
-            // Role is hard-coded: registration can only ever create a customer.
-            $stmt = mysqli_prepare(
-                $conn,
-                "INSERT INTO users (username, password, role) VALUES (?, ?, 'customer')"
-            );
-            mysqli_stmt_bind_param($stmt, 'ss', $username, $hash);
-            mysqli_stmt_execute($stmt);
-
-            flash('success', 'Akun berhasil dibuat. Silakan login untuk mendapat diskon 10%.');
-            redirect('login.php');
-        } catch (mysqli_sql_exception $e) {
-            $errors[] = $e->getCode() === 1062
-                ? 'Username sudah dipakai. Pilih yang lain.'
-                : 'Akun gagal dibuat. Coba lagi.';
+            $statement = $conn->prepare('INSERT INTO users (username, name, password, role) VALUES (?, ?, ?, "customer")');
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+            $statement->bind_param('sss', $username, $name, $hash);
+            $statement->execute();
+            $_SESSION['user_id'] = $conn->insert_id;
+            $_SESSION['username'] = $username;
+            $_SESSION['role'] = 'customer';
+            session_regenerate_id(true);
+            flash('Akun berhasil dibuat. Diskon 10% aktif untuk pesananmu.');
+            header('Location: index.php');
+            exit;
+        } catch (mysqli_sql_exception $exception) {
+            $error = 'Username sudah digunakan. Coba username lain.';
         }
     }
 }
+layout_start('Daftar');
 ?>
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar — Kopipiro</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <div class="container">
-        <div class="row justify-content-center" style="margin-top: 8vh;">
-            <div class="col-md-6 col-lg-5">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-4">
-                        <h4 class="mb-1">Daftar akun customer</h4>
-                        <p class="text-muted small mb-4">
-                            Setelah login, semua harga otomatis mendapat diskon 10%.
-                        </p>
-
-                        <?php render_flashes(); ?>
-
-                        <?php if ($errors): ?>
-                            <div class="alert alert-danger py-2 small">
-                                <ul class="mb-0 ps-3">
-                                    <?php foreach ($errors as $err): ?>
-                                        <li><?= e($err) ?></li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            </div>
-                        <?php endif; ?>
-
-                        <form method="POST" action="">
-                            <?= csrf_field() ?>
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username</label>
-                                <input type="text" class="form-control" id="username" name="username"
-                                       value="<?= e($username) ?>" required minlength="3" maxlength="50"
-                                       pattern="[A-Za-z0-9_]+" autocomplete="username">
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" name="password"
-                                       required minlength="8" autocomplete="new-password">
-                                <div class="form-text">Minimal 8 karakter.</div>
-                            </div>
-                            <div class="mb-4">
-                                <label for="password_confirm" class="form-label">Ulangi password</label>
-                                <input type="password" class="form-control" id="password_confirm"
-                                       name="password_confirm" required minlength="8" autocomplete="new-password">
-                            </div>
-                            <button type="submit" class="btn btn-dark w-100">Daftar</button>
-                        </form>
-
-                        <hr class="my-4">
-                        <p class="small text-muted mb-0">
-                            Sudah punya akun?
-                            <a href="<?= e(url('login.php')) ?>">Login di sini</a>
-                        </p>
-                    </div>
-                </div>
-                <p class="text-center mt-3 mb-0">
-                    <a href="<?= e(url('index.php')) ?>" class="small text-decoration-none">&larr; Lihat menu tanpa login</a>
-                </p>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+<section class="auth-section"><div class="auth-card"><span class="eyebrow">SELAMAT DATANG DI KOPIPIRO</span><h1>Satu langkah<br>menuju <em>favoritmu.</em></h1><p class="auth-intro">Buat akun dan dapatkan diskon 10% setiap kali pesan.</p><?php if ($error): ?><div class="alert alert-danger"><?= e($error) ?></div><?php endif; ?><form method="post"><label class="form-label" for="name">Nama lengkap</label><input class="form-control form-control-lg mb-3" id="name" name="name" required><label class="form-label" for="username">Username</label><input class="form-control form-control-lg mb-3" id="username" name="username" minlength="3" required><label class="form-label" for="password">Kata sandi</label><input class="form-control form-control-lg mb-4" type="password" id="password" name="password" minlength="8" required><button class="btn btn-dark btn-lg rounded-pill w-100">Buat akun</button></form><p class="auth-switch">Sudah punya akun? <a href="login.php">Masuk</a></p></div></section>
+<?php layout_end(); ?>
