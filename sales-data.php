@@ -1,11 +1,15 @@
 <?php
-require 'auth.php';
-require 'config.php';
+require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/orders_service.php';
 require_role('owner');
+
 header('Content-Type: application/json; charset=utf-8');
-$rows = $conn->query('SELECT DATE(created_at) AS sales_date, SUM(total) AS revenue FROM orders WHERE status = "completed" AND created_at >= CURRENT_DATE - INTERVAL 6 DAY GROUP BY DATE(created_at)');
+
+$summary = sales_summary($conn, 7);
 $daily = [];
-while ($row = $rows->fetch_assoc()) $daily[$row['sales_date']] = (int) $row['revenue'];
+foreach ($summary['daily'] as $row) {
+    $daily[$row['day']] = (int) $row['revenue'];
+}
 $labels = [];
 $values = [];
 for ($day = 6; $day >= 0; $day--) {

@@ -1,6 +1,5 @@
 <?php
-require 'auth.php';
-require 'config.php';
+require_once __DIR__ . '/helpers.php';
 $id = (int) ($_GET['id'] ?? 0);
 $statement = $conn->prepare('SELECT p.*, c.name AS category_name, (SELECT ROUND(AVG(r.rating), 1) FROM reviews r WHERE r.product_id = p.id) AS rating FROM products p JOIN categories c ON c.id = p.category_id WHERE p.id = ? AND p.is_available = 1');
 $statement->bind_param('i', $id);
@@ -12,8 +11,10 @@ $ratingStatement->bind_param('i', $id);
 $ratingStatement->execute();
 $reviews = $ratingStatement->get_result()->fetch_all(MYSQLI_ASSOC);
 $price = (int) $product['price'];
-$discounted = logged_in() && $_SESSION['role'] === 'customer';
+$member = me();
+$discounted = $member !== null && $member['role'] === 'customer';
+$finalPrice = final_price($price, $member);
 layout_start($product['name']);
 ?>
-<section class="page-section"><div class="container"><a href="index.php#menu" class="back-link">← Kembali ke menu</a><div class="detail-layout"><div class="detail-photo"><img src="<?= e($product['image'] ?: 'assets/img/coffee.svg') ?>" alt="<?= e($product['name']) ?>"></div><div class="detail-info"><span class="eyebrow"><?= e($product['category_name']) ?></span><h1><?= e($product['name']) ?></h1><div class="detail-rating">★ <?= $product['rating'] ? e($product['rating']) : 'Belum ada rating' ?></div><p><?= e($product['description']) ?></p><div class="detail-price"><?php if ($discounted): ?><del><?= money($price) ?></del><?php endif; ?><strong><?= money($discounted ? round($price * .9) : $price) ?></strong></div><form method="post" action="cart.php"><input type="hidden" name="product_id" value="<?= (int) $product['id'] ?>"><input type="hidden" name="action" value="add"><button class="btn btn-dark btn-lg rounded-pill px-5">Tambah ke keranjang</button></form></div></div><div class="review-section"><h2>Ulasan pelanggan</h2><?php if ($reviews): foreach ($reviews as $review): ?><div class="review-row"><strong><?= e($review['name']) ?></strong><span>★ <?= (int) $review['rating'] ?>/5</span><p><?= e($review['comment']) ?></p></div><?php endforeach; else: ?><p class="muted">Belum ada ulasan untuk menu ini.</p><?php endif; ?></div></div></section>
+<section class="page-section"><div class="container"><a href="index.php#menu" class="back-link">← Kembali ke menu</a><div class="detail-layout"><div class="detail-photo"><img src="<?= e(image_url($product['image'])) ?>" alt="<?= e($product['name']) ?>"></div><div class="detail-info"><span class="eyebrow"><?= e($product['category_name']) ?></span><h1><?= e($product['name']) ?></h1><div class="detail-rating">★ <?= $product['rating'] ? e($product['rating']) : 'Belum ada rating' ?></div><p><?= e($product['description']) ?></p><div class="detail-price"><?php if ($discounted): ?><del><?= money($price) ?></del><?php endif; ?><strong><?= money($finalPrice) ?></strong></div><form method="post" action="cart.php" class="js-add-to-cart"><input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>"><input type="hidden" name="product_id" value="<?= (int) $product['id'] ?>"><input type="hidden" name="action" value="add"><button class="btn btn-dark btn-lg rounded-pill px-5">Tambah ke keranjang</button></form></div></div><div class="review-section"><h2>Ulasan pelanggan</h2><?php if ($reviews): foreach ($reviews as $review): ?><div class="review-row"><strong><?= e($review['name']) ?></strong><span>★ <?= (int) $review['rating'] ?>/5</span><p><?= e($review['comment']) ?></p></div><?php endforeach; else: ?><p class="muted">Belum ada ulasan untuk menu ini.</p><?php endif; ?></div></div></section>
 <?php layout_end(); ?>

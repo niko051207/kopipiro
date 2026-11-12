@@ -75,7 +75,7 @@ CREATE TABLE reviews (
     customer_id INT NOT NULL,
     product_id INT NOT NULL,
     rating TINYINT UNSIGNED NOT NULL,
-    comment TEXT NOT NULL DEFAULT '',
+    comment TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY unique_customer_product (customer_id, product_id),
     CONSTRAINT fk_reviews_customer FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -88,15 +88,22 @@ INSERT INTO categories (name, slug, sort_order) VALUES
 ('Toast & Snack', 'toast-snack', 3);
 
 INSERT INTO products (category_id, name, slug, description, price, image, is_featured) VALUES
-(1, 'Kopi Susu Piro', 'kopi-susu-piro', 'Espresso house blend dengan susu segar dan gula aren racikan kami.', 28000, 'assets/img/coffee.svg', 1),
-(1, 'Es Kopi Karamel', 'es-kopi-karamel', 'Kopi dingin dengan sentuhan karamel lembut dan aftertaste yang hangat.', 32000, 'assets/img/coffee.svg', 1),
-(1, 'Americano', 'americano', 'Double espresso dan air mineral, sederhana dengan karakter yang kuat.', 22000, 'assets/img/coffee.svg', 0),
-(1, 'Cappuccino', 'cappuccino', 'Espresso seimbang dengan steamed milk dan lapisan foam yang lembut.', 30000, 'assets/img/coffee.svg', 0),
-(2, 'Matcha Cloud', 'matcha-cloud', 'Matcha pilihan dengan susu creamy dan lapisan foam lembut.', 32000, 'assets/img/non-coffee.svg', 1),
-(2, 'Cokelat Hangat', 'cokelat-hangat', 'Cokelat premium dengan susu segar, cocok untuk teman bersantai.', 28000, 'assets/img/non-coffee.svg', 0),
-(3, 'Toast Kaya Butter', 'toast-kaya-butter', 'Roti panggang renyah dengan selai kaya dan butter yang meleleh.', 24000, 'assets/img/toast.svg', 1),
-(3, 'Croissant Almond', 'croissant-almond', 'Croissant berlapis dengan almond panggang dan taburan gula halus.', 29000, 'assets/img/toast.svg', 0);
+(1, 'Kopi Susu Piro', 'kopi-susu-piro', 'Espresso house blend dengan susu segar dan gula aren racikan kami.', 28000, 'assets/img/kopsupiro.jpg', 1),
+(1, 'Es Kopi Karamel', 'es-kopi-karamel', 'Kopi dingin dengan sentuhan karamel lembut dan aftertaste yang hangat.', 32000, 'assets/img/karamlelatte.jpg', 1),
+(1, 'Americano', 'americano', 'Double espresso dan air mineral, sederhana dengan karakter yang kuat.', 22000, 'assets/img/americano.jpg', 0),
+(1, 'Cappuccino', 'cappuccino', 'Espresso seimbang dengan steamed milk dan lapisan foam yang lembut.', 30000, 'assets/img/cappucino.jpg', 0),
+(2, 'Matcha Cloud', 'matcha-cloud', 'Matcha pilihan dengan susu creamy dan lapisan foam lembut.', 32000, 'assets/img/matcha.jpg', 1),
+(2, 'Cokelat Hangat', 'cokelat-hangat', 'Cokelat premium dengan susu segar, cocok untuk teman bersantai.', 28000, 'assets/img/cokelat.jpg', 0),
+(3, 'Toast Kaya Butter', 'toast-kaya-butter', 'Roti panggang renyah dengan selai kaya dan butter yang meleleh.', 24000, 'assets/img/toast.jpg', 1),
+(3, 'Croissant Almond', 'croissant-almond', 'Croissant berlapis dengan almond panggang dan taburan gula halus.', 29000, 'assets/img/croissant.jpg', 0);
 
 INSERT INTO users (username, name, password, role) VALUES
-('owner', 'Owner Kopipiro', '$2y$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'owner'),
-('kasir1', 'Kasir Satu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'kasir');
+('owner', 'Owner Kopipiro', '$2y$10$lEFA/NlRH/35lnI6M4dU2uU7LQdx0YIcE0Olm2XlAy/v7BkZ1fZmi', 'owner'),
+('kasir1', 'Kasir Satu', '$2y$10$rYzCVwjpylZJc7cXnwYiYO.TM9ZXFVjKtBZb3KpzN.2hSLPxi2aCu', 'kasir'),
+('customer', 'Demo Customer', '$2y$10$YRcdRVTErpo4UPM4VdJs0OA4Jr3B4cbE5Fgj1gMPVPrOIZbKesWAi', 'customer');
+
+INSERT INTO reviews (customer_id, product_id, rating, comment) VALUES
+(3, 1, 5, 'Kopi susunya pas, tidak terlalu manis.'),
+(3, 2, 4, 'Karamelnya lembut dan tidak berlebihan.'),
+(3, 5, 5, 'Matcha-nya creamy, favorit banget.'),
+(3, 7, 4, 'Toast hangat dan renyah.');

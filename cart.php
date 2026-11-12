@@ -1,24 +1,33 @@
 <?php
+/**
+ * No-JavaScript fallback for the cart drawer. Adds, changes or removes one
+ * line, then sends the visitor back to the menu with the drawer open.
+ */
 require 'auth.php';
 require 'config.php';
+require_once __DIR__ . '/cart_service.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: index.php');
     exit;
 }
+require_csrf();
+
 $id = (int) ($_POST['product_id'] ?? 0);
 $action = $_POST['action'] ?? '';
-if ($action === 'remove') {
-    unset($_SESSION['cart'][$id]);
-} elseif ($action === 'set') {
-    $quantity = max(0, min(20, (int) ($_POST['quantity'] ?? 0)));
-    if ($quantity === 0) unset($_SESSION['cart'][$id]);
-    else $_SESSION['cart'][$id] = $quantity;
-} else {
-    $statement = $conn->prepare('SELECT id FROM products WHERE id = ? AND is_available = 1');
-    $statement->bind_param('i', $id);
-    $statement->execute();
-    if ($statement->get_result()->num_rows) $_SESSION['cart'][$id] = min(20, ($_SESSION['cart'][$id] ?? 0) + 1);
+if (!is_string($action)) {
+    $action = '';
 }
-header('Location: checkout.php');
+
+if ($action === 'remove') {
+    cart_remove($id);
+} elseif ($action === 'clear') {
+    cart_clear();
+} elseif ($action === 'set') {
+    cart_set($conn, $id, (int) ($_POST['quantity'] ?? 0));
+} else {
+    cart_add($conn, $id);
+}
+
+header('Location: index.php?cart=open');
 exit;
